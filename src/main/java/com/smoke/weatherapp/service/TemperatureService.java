@@ -3,6 +3,7 @@ package com.smoke.weatherapp.service;
 import com.smoke.weatherapp.model.OpenMeteoResponse;
 import com.smoke.weatherapp.model.TemperatureData;
 import com.smoke.weatherapp.repository.TemperatureDataRepository;
+import com.smoke.weatherapp.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,9 +25,13 @@ public class TemperatureService {
     private TemperatureDataRepository temperatureDataRepository;
 
     public TemperatureData getTemperatureData(double latitude, double longitude) {
-        int cacheInvalidationTimeMinutes = 1;
+        if (latitude < Constants.MIN_LATITUDE || latitude > Constants.MAX_LATITUDE ||
+                longitude < Constants.MIN_LONGITUDE || longitude > Constants.MAX_LONGITUDE) {
+            throw new IllegalArgumentException(Constants.ERROR_INVALID_COORDINATES);
+        }
+
         Optional<TemperatureData> cachedData = temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude);
-        boolean cachedDataIsValid = cachedData.isPresent() && cachedData.get().getTimestamp().isAfter(LocalDateTime.now().minusMinutes(cacheInvalidationTimeMinutes));
+        boolean cachedDataIsValid = cachedData.isPresent() && cachedData.get().getTimestamp().isAfter(LocalDateTime.now().minusMinutes(Constants.CACHE_INVALIDATION_TIME_MINUTES));
 
         if(cachedDataIsValid) {
             return cachedData.get();
@@ -44,7 +49,7 @@ public class TemperatureService {
             temperatureDataRepository.save(temperatureData);
             return temperatureData;
         } else {
-            throw new RuntimeException("Failed to get temperature data from Open-Meteo API");
+            throw new RuntimeException(Constants.ERROR_OPEN_METEO_API_FAILURE);
         }
     }
 }
