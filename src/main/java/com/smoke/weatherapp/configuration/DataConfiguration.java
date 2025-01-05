@@ -11,17 +11,17 @@ import java.time.LocalDateTime;
 @Configuration
 public class DataConfiguration {
 
-    @Bean
-    CommandLineRunner initDatabase(TemperatureDataRepository repository) {
-        return args -> {
-            repository.save(new TemperatureData(
-                    null,
-                    40.7128,
-                    -74.0060,
-                    25.5,
-                    LocalDateTime.now()
-            ));
-            repository.findAll().forEach(System.out::println);
-        };
-    }
+//    @Bean
+//    CommandLineRunner initDatabase(TemperatureDataRepository repository) {
+//        return args -> {
+//            repository.save(new TemperatureData(
+//                    null,
+//                    40.7128,
+//                    -74.0060,
+//                    25.5,
+//                    LocalDateTime.now()
+//            ));
+//            repository.findAll().forEach(System.out::println);
+//        };
+//    }
 }
