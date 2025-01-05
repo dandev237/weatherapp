@@ -2,7 +2,7 @@
 
 Weather App is a Spring Boot application that fetches and manages weather data from the Open Meteo API. It uses MongoDB for data storage and provides a RESTful API for accessing and manipulating temperature data.
 
-This application has been developed as part of a recruitment process and should not be used in production.
+This application has been developed as part of a recruitment process.
 
 ## Features
 
