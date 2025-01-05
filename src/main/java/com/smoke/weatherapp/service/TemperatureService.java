@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -30,7 +31,10 @@ public class TemperatureService {
             throw new IllegalArgumentException(Constants.ERROR_INVALID_COORDINATES);
         }
 
-        Optional<TemperatureData> cachedData = temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude);
+        List<TemperatureData> cachedDataList = temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude);
+        Optional<TemperatureData> cachedData = cachedDataList.stream()
+                .filter(data -> data.getTimestamp().isAfter(LocalDateTime.now().minusMinutes(Constants.CACHE_INVALIDATION_TIME_MINUTES)))
+                .findFirst();
         boolean cachedDataIsValid = cachedData.isPresent() && cachedData.get().getTimestamp().isAfter(LocalDateTime.now().minusMinutes(Constants.CACHE_INVALIDATION_TIME_MINUTES));
 
         if(cachedDataIsValid) {
@@ -41,7 +45,7 @@ public class TemperatureService {
     }
 
     private TemperatureData fetchFreshTemperatureData(double latitude, double longitude) {
-        String url = apiUrl + "?latitude=" + latitude + "&longitude=" + longitude + "&forecast_days=1";
+        String url = apiUrl + "?latitude=" + latitude + "&longitude=" + longitude + "&current_weather=true";
         OpenMeteoResponse response = restTemplate.getForObject(url, OpenMeteoResponse.class);
 
         if(response != null && response.getCurrentWeather() != null) {

@@ -12,7 +12,8 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,7 +57,7 @@ class TemperatureServiceTest {
     void testGetTemperatureData_ReturnsCacheIfUpdated() {
         TemperatureData cachedData = createTemperatureData(now);
         when(temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude))
-                .thenReturn(Optional.of(cachedData));
+                .thenReturn(Collections.singletonList(cachedData));
 
         TemperatureData result = temperatureService.getTemperatureData(latitude, longitude);
 
@@ -68,7 +69,7 @@ class TemperatureServiceTest {
     @Test
     void testGetTemperatureData_UsesApiIfCacheNotUpdated() {
         when(temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude))
-                .thenReturn(Optional.empty());
+                .thenReturn(Collections.emptyList());
 
         OpenMeteoResponse mockResponse = createMockResponse(temperature);
         when(restTemplate.getForObject(anyString(), eq(OpenMeteoResponse.class)))
