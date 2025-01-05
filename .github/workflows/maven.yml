@@ -30,25 +30,11 @@ jobs:
           java-version: '21'
           cache: maven
 
+      - name: Set up MongoDB URI
+        run: echo "SPRING_DATA_MONGODB_URI=mongodb://localhost:27017/weatherapp" >> $GITHUB_ENV
+
       - name: Build with Maven
         run: mvn -B clean package
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Cache Docker layers
-        uses: actions/cache@v3
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      - name: Build Docker image
-        run: docker build -t weatherapp .
-
-      - name: Run Docker container
-        run: docker run -d -p 8080:8080 --name weatherapp-container weatherapp
-
-      - name: Run tests inside Docker container
-        run: docker exec weatherapp-container mvn test -DargLine="-Xmx512m"
+      - name: Run tests
+        run: mvn test
