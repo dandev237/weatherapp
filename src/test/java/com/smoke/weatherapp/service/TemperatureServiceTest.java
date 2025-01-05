@@ -130,4 +130,25 @@ class TemperatureServiceTest {
 
         assertEquals(Constants.ERROR_INVALID_COORDINATES, exception.getMessage());
     }
+
+    @Test
+    void testDeleteTemperatureData_Success() {
+        List<TemperatureData> dataList = Collections.singletonList(new TemperatureData(null, latitude, longitude, 25.5, null));
+        when(temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude)).thenReturn(dataList);
+
+        boolean result = temperatureService.deleteTemperatureData(latitude, longitude);
+
+        assertTrue(result);
+        verify(temperatureDataRepository, times(1)).deleteAll(dataList);
+    }
+
+    @Test
+    void testDeleteTemperatureData_NotFound() {
+        when(temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude)).thenReturn(Collections.emptyList());
+
+        boolean result = temperatureService.deleteTemperatureData(latitude, longitude);
+
+        assertFalse(result);
+        verify(temperatureDataRepository, never()).deleteAll(anyList());
+    }
 }
