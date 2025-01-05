@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,5 +26,13 @@ public class TemperatureController {
             @Parameter(description = "Longitude of the location", required = true) @RequestParam double longitude) {
         TemperatureData temperatureData = temperatureService.getTemperatureData(latitude, longitude);
         return new TemperatureResponse(temperatureData.getLatitude(), temperatureData.getLongitude(), temperatureData.getTemperature());
+    }
+
+    @DeleteMapping("/temperature")
+    @Operation(summary = "Delete temperature data", description = "Deletes the temperature data for the given coordinates from the database.")
+    public boolean deleteTemperature(
+            @Parameter(description = "Latitude of the location", required = true) @RequestParam double latitude,
+            @Parameter(description = "Longitude of the location", required = true) @RequestParam double longitude) {
+        return temperatureService.deleteTemperatureData(latitude, longitude);
     }
 }
