@@ -56,4 +56,13 @@ public class TemperatureService {
             throw new RuntimeException(Constants.ERROR_OPEN_METEO_API_FAILURE);
         }
     }
+
+    public boolean deleteTemperatureData(double latitude, double longitude) {
+        List<TemperatureData> dataList = temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude);
+        if (!dataList.isEmpty()) {
+            temperatureDataRepository.deleteAll(dataList);
+            return true;
+        }
+        return false;
+    }
 }
