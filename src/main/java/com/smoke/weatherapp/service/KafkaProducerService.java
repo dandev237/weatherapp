@@ -11,7 +11,7 @@ public class KafkaProducerService {
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
-    private static final String TOPIC = "my_Topic";
+    private static final String TOPIC = "my-Topic";
 
     public void sendTemperatureDataMessage(TemperatureData data) {
         kafkaTemplate.send(TOPIC, data);

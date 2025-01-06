@@ -29,6 +29,6 @@ public class KafkaProducerServiceTest {
     @Test
     void testSendTemperatureDataMessage() {
         kafkaProducerService.sendTemperatureDataMessage(temperatureData);
-        verify(kafkaTemplate).send("my_Topic", temperatureData);
+        verify(kafkaTemplate).send("my-Topic", temperatureData);
     }
 }
