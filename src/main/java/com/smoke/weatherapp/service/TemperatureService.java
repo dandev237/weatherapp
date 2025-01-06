@@ -25,6 +25,9 @@ public class TemperatureService {
     @Autowired
     private TemperatureDataRepository temperatureDataRepository;
 
+    @Autowired
+    private KafkaProducerService kafkaProducerService;
+
     public TemperatureData getTemperatureData(double latitude, double longitude) {
         if (latitude < Constants.MIN_LATITUDE || latitude > Constants.MAX_LATITUDE ||
                 longitude < Constants.MIN_LONGITUDE || longitude > Constants.MAX_LONGITUDE) {
@@ -37,11 +40,16 @@ public class TemperatureService {
                 .findFirst();
         boolean cachedDataIsValid = cachedData.isPresent() && cachedData.get().getTimestamp().isAfter(LocalDateTime.now().minusMinutes(Constants.CACHE_INVALIDATION_TIME_MINUTES));
 
+        TemperatureData data;
         if(cachedDataIsValid) {
-            return cachedData.get();
+            data = cachedData.get();
         } else {
-            return fetchFreshTemperatureData(latitude, longitude);
+            data = fetchFreshTemperatureData(latitude, longitude);
         }
+
+        kafkaProducerService.sendTemperatureDataMessage(data);
+
+        return data;
     }
 
     private TemperatureData fetchFreshTemperatureData(double latitude, double longitude) {
