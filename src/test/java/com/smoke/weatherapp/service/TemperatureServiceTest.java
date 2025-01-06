@@ -27,6 +27,9 @@ class TemperatureServiceTest {
     @Mock
     private TemperatureDataRepository temperatureDataRepository;
 
+    @Mock
+    private KafkaProducerService kafkaProducerService;
+
     @InjectMocks
     private TemperatureService temperatureService;
 
@@ -64,6 +67,7 @@ class TemperatureServiceTest {
         assertNotNull(result);
         assertEquals(temperature, result.getTemperature());
         verify(restTemplate, never()).getForObject(anyString(), eq(OpenMeteoResponse.class));
+        verify(kafkaProducerService, times(1)).sendTemperatureDataMessage(cachedData);
     }
 
     @Test
@@ -80,6 +84,7 @@ class TemperatureServiceTest {
         assertNotNull(result);
         assertEquals(temperature, result.getTemperature());
         verify(restTemplate, times(1)).getForObject(anyString(), eq(OpenMeteoResponse.class));
+        verify(kafkaProducerService, times(1)).sendTemperatureDataMessage(result);
     }
 
     @Test
@@ -93,6 +98,7 @@ class TemperatureServiceTest {
         assertNotNull(result);
         assertEquals(temperature, result.getTemperature());
         verify(temperatureDataRepository, times(1)).save(any(TemperatureData.class));
+        verify(kafkaProducerService, times(1)).sendTemperatureDataMessage(result);
     }
 
     @Test
