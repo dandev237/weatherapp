@@ -58,8 +58,16 @@ public class TemperatureService {
 
         if(response != null && response.getCurrentWeather() != null) {
             TemperatureData temperatureData = new TemperatureData(null, latitude, longitude, response.getCurrentWeather().getTemperature(), LocalDateTime.now());
-            temperatureDataRepository.save(temperatureData);
-            return temperatureData;
+            TemperatureData existingTemperatureData = temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude).stream().findAny().orElse(null);
+            if (existingTemperatureData != null) {
+                existingTemperatureData.setTemperature(temperatureData.getTemperature());
+                existingTemperatureData.setTimestamp(temperatureData.getTimestamp());
+                temperatureDataRepository.save(existingTemperatureData);
+                return existingTemperatureData;
+            } else {
+                temperatureDataRepository.save(temperatureData);
+                return temperatureData;
+            }
         } else {
             throw new RuntimeException(Constants.ERROR_OPEN_METEO_API_FAILURE);
         }

@@ -6,6 +6,7 @@ import com.smoke.weatherapp.repository.TemperatureDataRepository;
 import com.smoke.weatherapp.util.Constants;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -45,6 +46,10 @@ class TemperatureServiceTest {
     }
 
     private TemperatureData createTemperatureData(LocalDateTime timestamp) {
+        return createTemperatureData(timestamp, temperature);
+    }
+
+    private TemperatureData createTemperatureData(LocalDateTime timestamp, double temperature) {
         return new TemperatureData(null, latitude, longitude, temperature, timestamp);
     }
 
@@ -88,7 +93,7 @@ class TemperatureServiceTest {
     }
 
     @Test
-    void testFetchFreshTemperatureData_StoresDataInMongoDB() {
+    void testFetchFreshTemperatureData_StoresDataIfItIsNew() {
         OpenMeteoResponse mockResponse = createMockResponse(temperature);
         when(restTemplate.getForObject(anyString(), eq(OpenMeteoResponse.class)))
                 .thenReturn(mockResponse);
@@ -98,6 +103,30 @@ class TemperatureServiceTest {
         assertNotNull(result);
         assertEquals(temperature, result.getTemperature());
         verify(temperatureDataRepository, times(1)).save(any(TemperatureData.class));
+        verify(kafkaProducerService, times(1)).sendTemperatureDataMessage(result);
+    }
+
+    @Test
+    void testFetchFreshTemperatureData_UpdatesDataIfItExists() {
+        TemperatureData existingData = createTemperatureData(now.minusMinutes(10), 24.5);
+        when(temperatureDataRepository.findByLatitudeAndLongitude(latitude, longitude))
+                .thenReturn(Collections.singletonList(existingData));
+
+        OpenMeteoResponse mockResponse = createMockResponse(temperature);
+        when(restTemplate.getForObject(anyString(), eq(OpenMeteoResponse.class)))
+                .thenReturn(mockResponse);
+
+        TemperatureData result = temperatureService.getTemperatureData(latitude, longitude);
+
+        assertNotNull(result);
+        assertEquals(temperature, result.getTemperature());
+
+        ArgumentCaptor<TemperatureData> captor = ArgumentCaptor.forClass(TemperatureData.class);
+        verify(temperatureDataRepository, times(1)).save(captor.capture());
+        TemperatureData capturedData = captor.getValue();
+
+        assertEquals(temperature, capturedData.getTemperature());
+        assertTrue(capturedData.getTimestamp().isAfter(now.minusMinutes(10)));
         verify(kafkaProducerService, times(1)).sendTemperatureDataMessage(result);
     }
 
