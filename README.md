@@ -1,6 +1,6 @@
 # Weather App
 
-Weather App is a Spring Boot application that fetches and manages weather data from the Open Meteo API. It uses MongoDB for data storage and provides a RESTful API for accessing and manipulating temperature data.
+Weather App is a Spring Boot application that fetches and manages weather data from the Open Meteo API. It uses MongoDB for data storage and Kafka for messaging. The application provides a RESTful API for accessing and manipulating temperature data.
 
 This application has been developed as part of a recruitment process.
 
@@ -9,6 +9,7 @@ This application has been developed as part of a recruitment process.
 - Fetch current temperature data for given coordinates.
 - Cache temperature data to reduce API calls.
 - Delete temperature data for specific coordinates.
+- Publish temperature data to a Kafka topic.
 - Swagger UI for API documentation and testing.
 
 ## Technologies Used
@@ -16,6 +17,7 @@ This application has been developed as part of a recruitment process.
 - Java 21
 - Spring Boot 3.4.1
 - MongoDB
+- Kafka
 - Lombok
 - Maven
 - Swagger (Springdoc OpenAPI)
